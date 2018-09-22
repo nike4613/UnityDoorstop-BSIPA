@@ -5,7 +5,7 @@
 #include "winapi_util.h"
 #include "assert_util.h"
 
-#define CONFIG_NAME L"doorstop_config.ini"
+#define CONFIG_NAME L"doorstop_config"
 #define DEFAULT_TARGET_ASSEMBLY L"Doorstop.dll"
 #define EXE_EXTENSION_LENGTH 4
 
@@ -16,26 +16,55 @@ wchar_t *targetAssembly = NULL;
 
 inline void initConfigFile()
 {
-	if (GetFileAttributesW(CONFIG_NAME) == INVALID_FILE_ATTRIBUTES)
+	enabled = TRUE;
+	/*wchar_t* tgtAsm = L"Beat Saber_Data/Managed/IPA.Injector.dll";
+	targetAssembly = memalloc(sizeof(wchar_t) * 41);
+	memcpy(targetAssembly, tgtAsm, sizeof(wchar_t) * 41);*/
+	targetAssembly = L"Beat Saber_Data/Managed/IPA.Injector.dll";
+	/*if (GetFileAttributesW(CONFIG_NAME) == INVALID_FILE_ATTRIBUTES)
 		return;
 
 	const size_t len = GetFullPathNameW(CONFIG_NAME, 0, NULL, NULL);
 	wchar_t *configPath = memalloc(sizeof(wchar_t) * len);
 	GetFullPathNameW(CONFIG_NAME, len, configPath, NULL);
 
-	wchar_t enabledString[256] = L"true";
-	GetPrivateProfileStringW(L"UnityDoorstop", L"enabled", L"true", enabledString, 256, configPath);
+	LOG("Config path: %S\n", configPath);
 
-	if (STR_EQUAL(enabledString, L"true"))
-		enabled = TRUE;
-	else if (STR_EQUAL(enabledString, L"false"))
+	LPOFSTRUCT openParams = memcalloc(sizeof(OFSTRUCT));
+	openParams->cBytes = sizeof(OFSTRUCT);
+	openParams->fFixedDisk = 0;
+	HFILE file = OpenFile(configPath, openParams, OF_READ);
+	if (file == HFILE_ERROR) {
 		enabled = FALSE;
+		targetAssembly = NULL;
+	}
+	else
+	{
+		wchar_t enabledString[256] = L"enabled";
+		//GetPrivateProfileStringW(L"UnityDoorstop", L"enabled", L"true", enabledString, 256, configPath);
+		// TODO: proper checks for this
 
-	targetAssembly = get_ini_entry(configPath, L"UnityDoorstop", L"targetAssembly", DEFAULT_TARGET_ASSEMBLY);
+		if (STR_EQUAL(enabledString, L"enabled"))
+			enabled = TRUE;
+		else
+			enabled = FALSE;
+
+		LPDWORD fsize = memalloc(sizeof(DWORD));
+		GetFileSize(file, fsize);
+
+		targetAssembly = memalloc(sizeof(wchar_t) * *fsize);
+		if (!ReadFile(file, targetAssembly, *fsize, fsize, NULL)) {
+			enabled = FALSE;
+			LOG("LastError: %d\n", GetLastError());
+		}
+
+		//targetAssembly = get_ini_entry(configPath, L"UnityDoorstop", L"targetAssembly", DEFAULT_TARGET_ASSEMBLY);
+
+	}
 
 	LOG("Config; Target assembly: %S\n", targetAssembly);
 
-	memfree(configPath);
+	memfree(configPath);*/
 }
 
 inline void initCmdArgs()
@@ -90,6 +119,6 @@ inline void loadConfig()
 
 inline void cleanupConfig()
 {
-	if (targetAssembly != NULL)
-		memfree(targetAssembly);
+	/*if (targetAssembly != NULL)
+		memfree(targetAssembly);*/
 }

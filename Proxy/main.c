@@ -126,7 +126,7 @@ void * WINAPI hookGetProcAddress(HMODULE module, char const *name)
 	return (void*)GetProcAddress(module, name);
 }
 
-BOOL WINAPI DllEntry(HINSTANCE hInstDll, DWORD reasonForDllLoad, LPVOID reserved)
+BOOL WINAPI DllMain(HINSTANCE hInstDll, DWORD reasonForDllLoad, LPVOID reserved)
 {
 	if (reasonForDllLoad != DLL_PROCESS_ATTACH)
 		return TRUE;
