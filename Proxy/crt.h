@@ -1,5 +1,7 @@
 #pragma once
 
+#pragma warning( disable : 4028)
+
 HANDLE hHeap;
 
 #define memalloc(size) HeapAlloc(hHeap, HEAP_GENERATE_EXCEPTIONS, size)

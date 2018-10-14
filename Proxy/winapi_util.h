@@ -1,5 +1,7 @@
 #pragma once
 
+#pragma warning( disable : 4267 )
+
 #include <windows.h>
 #include "crt.h"
 

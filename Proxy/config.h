@@ -1,5 +1,7 @@
 #pragma once
 
+#pragma warning( disable : 4267 )
+
 #include <windows.h>
 #include <shellapi.h>
 #include "winapi_util.h"

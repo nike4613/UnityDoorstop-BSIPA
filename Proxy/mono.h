@@ -9,6 +9,8 @@
 
 #pragma once
 
+#pragma warning( disable : 4152 )
+
 #include <windows.h>
 
 // Creates a MonoString based from a C wide string

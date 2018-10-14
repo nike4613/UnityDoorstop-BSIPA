@@ -14,6 +14,8 @@
 
 #pragma once
 
+#pragma warning( disable : 4267 )
+
 #include <windows.h>
 #include <Shlwapi.h>
 #include "assert_util.h"

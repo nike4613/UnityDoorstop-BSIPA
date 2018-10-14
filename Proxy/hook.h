@@ -20,6 +20,7 @@
 
 #pragma once
 
+#pragma warning( disable : 4267 90 )
 
 #include <windows.h>
 

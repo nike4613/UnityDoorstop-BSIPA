@@ -12,6 +12,8 @@
  * (that can be fixed by changing the appropriate compile flag that I am yet to locate).
  */
 
+#pragma warning( disable : 4244 )
+ 
 #include <windows.h>
 
 #define ADD_ORIGINAL(i, name) originalFunctions[i] = GetProcAddress(dll, #name)

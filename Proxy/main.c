@@ -19,6 +19,8 @@
  *
  */
 
+#pragma warning( disable : 4267 100 152 )
+
 #include "winapi_util.h"
 #include <windows.h>
 
