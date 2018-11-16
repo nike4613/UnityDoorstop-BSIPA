@@ -32,12 +32,26 @@
 
 EXTERN_C IMAGE_DOS_HEADER __ImageBase; // This is provided by MSVC with the infomration about this DLL
 
+void ownMonoJitParseOptions(int argc, char * argv[]);
+BOOL setOptions = FALSE;
+
 // The hook for mono_jit_init_version
 // We use this since it will always be called once to initialize Mono's JIT
 void *ownMonoJitInitVersion(const char *root_domain_name, const char *runtime_version)
 {
 	// Call the original mono_jit_init_version to initialize the Unity Root Domain
+	if (debug) {
+		char* opts[1];
+		opts[0] = "";
+		ownMonoJitParseOptions(0, opts);
+	}
+
 	void *domain = mono_jit_init_version(root_domain_name, runtime_version);
+
+	if (debug) {
+		mono_debug_init(MONO_DEBUG_FORMAT_MONO);
+		mono_debug_domain_create(domain);
+	}
 
 	size_t len = WideCharToMultiByte(CP_UTF8, 0, targetAssembly, -1, NULL, 0, NULL, NULL);
 	char *dll_path = memalloc(sizeof(char) * len);
@@ -101,7 +115,7 @@ void *ownMonoJitInitVersion(const char *root_domain_name, const char *runtime_ve
 	{
 		memfree(app_path);
 		memfree(args);
-		args = NULL;
+		NULL;
 	}
 
 	cleanupConfig();
@@ -111,19 +125,48 @@ void *ownMonoJitInitVersion(const char *root_domain_name, const char *runtime_ve
 	return domain;
 }
 
+void ownMonoJitParseOptions(int argc, char * argv[])
+{
+	setOptions = TRUE;
+
+	int size = argc;
+	if (debug) size += 2;
+
+	char** arguments = memalloc(sizeof(char*) * size);
+	memcpy(arguments, argv, sizeof(char*) * argc);
+	if (debug) {
+		arguments[argc++] = "--soft-breakpoints",
+		arguments[argc++] = "--debugger-agent=transport=dt_socket,address=127.0.0.1:10000,server=y";
+	}
+
+	mono_jit_parse_options(size, arguments);
+
+	memfree(arguments);
+}
+
 BOOL initialized = FALSE;
+
+void init(HMODULE module)
+{
+	if (!initialized)
+	{
+		initialized = TRUE;
+		LOG("Got mono.dll at %p\n", module);
+		loadMonoFunctions(module);
+	}
+}
 
 void * WINAPI hookGetProcAddress(HMODULE module, char const *name)
 {
 	if (lstrcmpA(name, "mono_jit_init_version") == 0)
 	{
-		if (!initialized)
-		{
-			initialized = TRUE;
-			LOG("Got mono.dll at %p\n", module);
-			loadMonoFunctions(module);
-		}
+		init(module);
 		return (void*)&ownMonoJitInitVersion;
+	}
+	if (lstrcmpA(name, "mono_jit_parse_options") == 0 && debug)
+	{
+		init(module);
+		return (void*)&ownMonoJitParseOptions;
 	}
 	return (void*)GetProcAddress(module, name);
 }
@@ -178,7 +221,7 @@ BOOL WINAPI DllMain(HINSTANCE hInstDll, DWORD reasonForDllLoad, LPVOID reserved)
 	}
 	else
 	{
-		LOG("Doorstop dissabled! memfreeing resources\n");
+		LOG("Doorstop disabled! memfreeing resources\n");
 		free_logger();
 	}
 

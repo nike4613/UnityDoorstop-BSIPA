@@ -31,6 +31,17 @@
 // This way we don't need to include or define any of Mono's structs, which saves space
 // This, obviously, comes with a drawback of not being able to easily access the contents of the structs
 
+typedef enum {
+	MONO_DEBUG_FORMAT_NONE,
+	MONO_DEBUG_FORMAT_MONO,
+	/* Deprecated, the mdb debugger is not longer supported. */
+	MONO_DEBUG_FORMAT_DEBUGGER
+} MonoDebugFormat;
+
+void (*mono_jit_parse_options)(int argc, char * argv[]);
+void (*mono_debug_init)(MonoDebugFormat format);
+void(*mono_debug_domain_create)(void*);
+
 void *(*mono_jit_init_version)(const char *root_domain_name, const char *runtime_version);
 void *(*mono_domain_assembly_open)(void *domain, const char *name);
 void *(*mono_assembly_get_image)(void *assembly);
@@ -58,12 +69,15 @@ inline void loadMonoFunctions(HMODULE monoLib)
 	// Enjoy the fact that C allows such sloppy casting
 	// In C++ you would have to cast to the precise function pointer type
 #define GET_MONO_PROC(name) name = (void*)GetProcAddress(monoLib, #name)
-
+	
 	// Find and assign all our functions that we are going to use
+	GET_MONO_PROC(mono_debug_domain_create);
 	GET_MONO_PROC(mono_domain_assembly_open);
 	GET_MONO_PROC(mono_assembly_get_image);
 	GET_MONO_PROC(mono_runtime_invoke);
+	GET_MONO_PROC(mono_debug_init);
 	GET_MONO_PROC(mono_jit_init_version);
+	GET_MONO_PROC(mono_jit_parse_options);
 	GET_MONO_PROC(mono_method_desc_new);
 	GET_MONO_PROC(mono_method_desc_search_in_image);
 	GET_MONO_PROC(mono_method_signature);

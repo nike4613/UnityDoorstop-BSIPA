@@ -12,6 +12,7 @@
 #define EXE_EXTENSION_LENGTH 4
 
 BOOL enabled = FALSE;
+BOOL debug = FALSE;
 wchar_t *targetAssembly = NULL;
 
 #define STR_EQUAL(str1, str2) (lstrcmpiW(str1, str2) == 0)
@@ -97,6 +98,11 @@ inline void initCmdArgs()
 			targetAssembly = memalloc(sizeof(wchar_t) * len);
 			lstrcpynW(targetAssembly, argv[++i], len);
 			LOG("Args; Target assembly: %S\n", targetAssembly);
+		}
+		else if (IS_ARGUMENT(L"--mono-debug"))
+		{
+			debug = TRUE;
+			LOG("Enabled debugging\n");
 		}
 	}
 
