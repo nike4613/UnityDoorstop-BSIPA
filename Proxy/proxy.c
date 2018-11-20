@@ -19,7 +19,7 @@
 #define ADD_ORIGINAL(i, name) originalFunctions[i] = GetProcAddress(dll, #name)
 
 #define PROXY(i, name) \
-	__declspec(dllexport) ULONG name() \
+	__declspec(dllexport) ULONG __stdcall name() \
 	{ \
 		return originalFunctions[i](); \
 	}
