@@ -22,7 +22,7 @@
 #pragma warning( disable : 4267 100 152 )
 
 #include "winapi_util.h"
-#include <windows.h>
+#include <Windows.h>
 
 #include "config.h"
 #include "mono.h"
@@ -130,12 +130,13 @@ void ownMonoJitParseOptions(int argc, char * argv[])
 	setOptions = TRUE;
 
 	int size = argc;
-	if (debug) size += 2;
+	if (debug) size += 3;
 
 	char** arguments = memalloc(sizeof(char*) * size);
 	memcpy(arguments, argv, sizeof(char*) * argc);
 	if (debug) {
-		arguments[argc++] = "--soft-breakpoints",
+		arguments[argc++] = "--debug";
+		arguments[argc++] = "--soft-breakpoints";
 		arguments[argc] = "--debugger-agent=transport=dt_socket,address=127.0.0.1:10000,server=y";
 	}
 
