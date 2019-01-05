@@ -105,6 +105,7 @@ void *ownMonoJitInitVersion(const char *root_domain_name, const char *runtime_ve
 		SET_ARRAY_REF(args_array, 1, doorstop_handle);
 
 		args = memalloc(sizeof(void*) * 1);
+		_ASSERTE(args != nullptr);
 		args[0] = args_array;
 	}
 
@@ -133,6 +134,7 @@ void ownMonoJitParseOptions(int argc, char * argv[])
 	if (debug) size += 3;
 
 	char** arguments = memalloc(sizeof(char*) * size);
+	_ASSERTE(arguments != nullptr);
 	memcpy(arguments, argv, sizeof(char*) * argc);
 	if (debug) {
 		arguments[argc++] = "--debug";

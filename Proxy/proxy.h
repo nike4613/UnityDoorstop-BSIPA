@@ -16,9 +16,10 @@
 
 #pragma warning( disable : 4267 )
 
-#include <windows.h>
+#include <Windows.h>
 #include <Shlwapi.h>
 #include "assert_util.h"
+#include <crtdbg.h>
 
 #define ALT_POSTFIX L"_alt.dll"
 #define DLL_POSTFIX L".dll"
@@ -52,6 +53,7 @@ inline void loadProxy(wchar_t *moduleName)
 	{
 		size_t system_dir_len = GetSystemDirectoryW(NULL, 0);
 		dll_path = memalloc(sizeof(wchar_t) * (system_dir_len + module_name_len + STR_LEN(DLL_POSTFIX)));
+		_ASSERTE(dll_path != nullptr);
 		GetSystemDirectoryW(dll_path, system_dir_len);
 		dll_path[system_dir_len - 1] = L'\\';
 		wmemcpy(dll_path + system_dir_len, moduleName, module_name_len);
