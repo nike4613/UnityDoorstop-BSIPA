@@ -131,14 +131,14 @@ void ownMonoJitParseOptions(int argc, char * argv[])
 	setOptions = TRUE;
 
 	int size = argc;
-	if (debug) size += 3;
+	if (debug) size += 1;
 
 	char** arguments = memalloc(sizeof(char*) * size);
 	_ASSERTE(arguments != nullptr);
 	memcpy(arguments, argv, sizeof(char*) * argc);
 	if (debug) {
-		arguments[argc++] = "--debug";
-		arguments[argc++] = "--soft-breakpoints";
+		//arguments[argc++] = "--debug";
+		//arguments[argc++] = "--soft-breakpoints";
 		arguments[argc] = "--debugger-agent=transport=dt_socket,address=127.0.0.1:10000,server=y";
 	}
 
