@@ -13,6 +13,7 @@
 
 BOOL enabled = FALSE;
 BOOL debug = FALSE;
+BOOL debug_server = FALSE;
 wchar_t *targetAssembly = NULL;
 
 #define STR_EQUAL(str1, str2) (lstrcmpiW(str1, str2) == 0)
@@ -103,6 +104,11 @@ inline void initCmdArgs()
 		{
 			debug = TRUE;
 			LOG("Enabled debugging\n");
+		}
+		else if (IS_ARGUMENT(L"--server"))
+		{
+			debug_server = TRUE;
+			LOG("Server-mode debugging enabled");
 		}
 	}
 
