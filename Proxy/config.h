@@ -2,7 +2,7 @@
 
 #pragma warning( disable : 4267 )
 
-#include <windows.h>
+#include <Windows.h>
 #include <shellapi.h>
 #include "winapi_util.h"
 #include "assert_util.h"
@@ -14,6 +14,7 @@
 BOOL enabled = FALSE;
 BOOL debug = FALSE;
 BOOL debug_server = FALSE;
+BOOL debug_info = FALSE;
 wchar_t *targetAssembly = NULL;
 
 #define STR_EQUAL(str1, str2) (lstrcmpiW(str1, str2) == 0)
@@ -103,7 +104,13 @@ inline void initCmdArgs()
 		else if (IS_ARGUMENT(L"--mono-debug"))
 		{
 			debug = TRUE;
+			debug_info = TRUE;
 			LOG("Enabled debugging\n");
+		}
+		else if (IS_ARGUMENT(L"--debug"))
+		{
+			debug_info = TRUE;
+			LOG("Enabled loading of debug info");
 		}
 		else if (IS_ARGUMENT(L"--server"))
 		{

@@ -48,7 +48,7 @@ void *ownMonoJitInitVersion(const char *root_domain_name, const char *runtime_ve
 
 	void *domain = mono_jit_init_version(root_domain_name, runtime_version);
 
-	if (debug) {
+	if (debug_info) {
 		mono_debug_init(MONO_DEBUG_FORMAT_MONO);
 		mono_debug_domain_create(domain);
 	}
@@ -131,14 +131,14 @@ void ownMonoJitParseOptions(int argc, char * argv[])
 	setOptions = TRUE;
 
 	int size = argc;
-	if (debug) size += 1;
+	if (debug) size += 2;
 
 	char** arguments = memalloc(sizeof(char*) * size);
 	_ASSERTE(arguments != nullptr);
 	memcpy(arguments, argv, sizeof(char*) * argc);
 	if (debug) {
 		//arguments[argc++] = "--debug";
-		//arguments[argc++] = "--soft-breakpoints";
+		arguments[argc++] = "--soft-breakpoints";
 		if (debug_server)
 			arguments[argc] = "--debugger-agent=transport=dt_socket,address=127.0.0.1:10000,server=y";
 		else
