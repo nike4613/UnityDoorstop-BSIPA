@@ -140,7 +140,7 @@ void ownMonoJitParseOptions(int argc, char * argv[])
 		//arguments[argc++] = "--debug";
 		arguments[argc++] = "--soft-breakpoints";
 		if (debug_server)
-			arguments[argc] = "--debugger-agent=transport=dt_socket,address=127.0.0.1:10000,server=y";
+			arguments[argc] = "--debugger-agent=transport=dt_socket,address=0.0.0.0:10000,server=y";
 		else
 			arguments[argc] = "--debugger-agent=transport=dt_socket,address=127.0.0.1:10000,server=n";
 	}
