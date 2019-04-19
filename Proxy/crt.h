@@ -1,6 +1,6 @@
 #pragma once
 
-#pragma warning( disable : 4028)
+#pragma warning( disable : 4028 28251 6001 )
 
 HANDLE hHeap;
 

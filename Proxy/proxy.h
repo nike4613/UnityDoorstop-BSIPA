@@ -14,7 +14,7 @@
 
 #pragma once
 
-#pragma warning( disable : 4267 )
+#pragma warning( disable : 4267 6387 6386 )
 
 #include <Windows.h>
 #include <Shlwapi.h>

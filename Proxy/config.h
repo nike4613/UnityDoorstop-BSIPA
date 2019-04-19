@@ -6,6 +6,7 @@
 #include <shellapi.h>
 #include "winapi_util.h"
 #include "assert_util.h"
+#include "crt.h"
 
 #define CONFIG_NAME L"doorstop_config"
 #define DEFAULT_TARGET_ASSEMBLY L"Doorstop.dll"
@@ -25,51 +26,47 @@ inline void initConfigFile()
 	/*wchar_t* tgtAsm = L"Beat Saber_Data/Managed/IPA.Injector.dll";
 	targetAssembly = memalloc(sizeof(wchar_t) * 41);
 	memcpy(targetAssembly, tgtAsm, sizeof(wchar_t) * 41);*/
-	targetAssembly = L"Beat Saber_Data/Managed/IPA.Injector.dll";
-	/*if (GetFileAttributesW(CONFIG_NAME) == INVALID_FILE_ATTRIBUTES)
-		return;
 
-	const size_t len = GetFullPathNameW(CONFIG_NAME, 0, NULL, NULL);
-	wchar_t *configPath = memalloc(sizeof(wchar_t) * len);
-	GetFullPathNameW(CONFIG_NAME, len, configPath, NULL);
-
-	LOG("Config path: %S\n", configPath);
-
-	LPOFSTRUCT openParams = memcalloc(sizeof(OFSTRUCT));
-	openParams->cBytes = sizeof(OFSTRUCT);
-	openParams->fFixedDisk = 0;
-	HFILE file = OpenFile(configPath, openParams, OF_READ);
-	if (file == HFILE_ERROR) {
-		enabled = FALSE;
-		targetAssembly = NULL;
-	}
-	else
+	WIN32_FIND_DATAW findData;
+	HANDLE findHandle = FindFirstFileW(L"*_Data", &findData);
+	if (findHandle == INVALID_HANDLE_VALUE)
 	{
-		wchar_t enabledString[256] = L"enabled";
-		//GetPrivateProfileStringW(L"UnityDoorstop", L"enabled", L"true", enabledString, 256, configPath);
-		// TODO: proper checks for this
+		MessageBoxW(NULL, L"Could not locate game being injected!", L"No files found in current directory matching '*_Data'", 
+			MB_OK | MB_ICONERROR | MB_SYSTEMMODAL | MB_TOPMOST | MB_SETFOREGROUND);
 
-		if (STR_EQUAL(enabledString, L"enabled"))
-			enabled = TRUE;
-		else
-			enabled = FALSE;
-
-		LPDWORD fsize = memalloc(sizeof(DWORD));
-		GetFileSize(file, fsize);
-
-		targetAssembly = memalloc(sizeof(wchar_t) * *fsize);
-		if (!ReadFile(file, targetAssembly, *fsize, fsize, NULL)) {
-			enabled = FALSE;
-			LOG("LastError: %d\n", GetLastError());
-		}
-
-		//targetAssembly = get_ini_entry(configPath, L"UnityDoorstop", L"targetAssembly", DEFAULT_TARGET_ASSEMBLY);
-
+		ExitProcess(GetLastError());
 	}
 
-	LOG("Config; Target assembly: %S\n", targetAssembly);
+	do
+	{
+		if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+		{ // must be a directory
+			wchar_t* target = memalloc(MAX_PATH * sizeof(wchar_t));
 
-	memfree(configPath);*/
+			const int EXIT_FAILURE = 1;
+			ASSERT(target != NULL, L"Address returned by memalloc was NULL!");
+
+			wmemcpy(target, findData.cFileName, wcslen(findData.cFileName));
+			wmemcpy(target + wcslen(target), L"/Managed/IPA.Injector.dll", 26);
+
+#ifdef _VERBOSE
+			MessageBoxW(NULL, L"path", target, MB_OK);
+#endif
+
+			targetAssembly = target;
+			FindClose(findHandle);
+			break;
+		}
+	} 
+	while (FindNextFileW(findHandle, &findData) != 0);
+
+	if (targetAssembly == NULL)
+	{
+		MessageBoxW(NULL, L"Could not locate game being injected!", L"No valid directories matching '*_Data'",
+			MB_OK | MB_ICONERROR | MB_SYSTEMMODAL | MB_TOPMOST | MB_SETFOREGROUND);
+
+		ExitProcess(GetLastError());
+	}
 }
 
 inline void initCmdArgs()
@@ -83,7 +80,7 @@ inline void initCmdArgs()
 	for (int i = 0; i < argc; i++)
 	{
 		wchar_t *arg = argv[i];
-		if (IS_ARGUMENT(L"--doorstop-enable"))
+		/*if (IS_ARGUMENT(L"--doorstop-enable"))
 		{
 			wchar_t *par = argv[++i];
 
@@ -101,7 +98,7 @@ inline void initCmdArgs()
 			lstrcpynW(targetAssembly, argv[++i], len);
 			LOG("Args; Target assembly: %S\n", targetAssembly);
 		}
-		else if (IS_ARGUMENT(L"--mono-debug"))
+		else */if (IS_ARGUMENT(L"--mono-debug"))
 		{
 			debug = TRUE;
 			debug_info = TRUE;
@@ -140,6 +137,6 @@ inline void loadConfig()
 
 inline void cleanupConfig()
 {
-	/*if (targetAssembly != NULL)
-		memfree(targetAssembly);*/
+	if (targetAssembly != NULL)
+		memfree(targetAssembly);
 }
