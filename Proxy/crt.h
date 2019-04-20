@@ -23,7 +23,7 @@ inline void *wmemset(wchar_t *dst, wchar_t c, size_t n)
 {
 	wchar_t *d = dst;
 	while (n--)
-		*d = c;
+		*(d++) = c;
 	return dst;
 }
 

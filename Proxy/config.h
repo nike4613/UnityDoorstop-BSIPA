@@ -46,11 +46,22 @@ inline void initConfigFile()
 			const int EXIT_FAILURE = 1;
 			ASSERT(target != NULL, L"Address returned by memalloc was NULL!");
 
-			wmemcpy(target, findData.cFileName, wcslen(findData.cFileName));
-			wmemcpy(target + wcslen(target), L"/Managed/IPA.Injector.dll", 26);
+#ifdef _VERBOSE
+			MessageBoxW(NULL, target, findData.cFileName, MB_OK);
+#endif
+
+			wmemset(target, 0, MAX_PATH);
 
 #ifdef _VERBOSE
-			MessageBoxW(NULL, L"path", target, MB_OK);
+			MessageBoxW(NULL, target, findData.cFileName, MB_OK);
+#endif
+			wmemcpy(target, findData.cFileName, wcslen(findData.cFileName));
+#ifdef _VERBOSE
+			MessageBoxW(NULL, target, findData.cFileName, MB_OK);
+#endif
+			wmemcpy(target + wcslen(target), L"/Managed/IPA.Injector.dll", 26);
+#ifdef _VERBOSE
+			MessageBoxW(NULL, target, findData.cFileName, MB_OK);
 #endif
 
 			targetAssembly = target;
