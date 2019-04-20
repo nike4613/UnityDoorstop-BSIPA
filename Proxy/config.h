@@ -23,9 +23,6 @@ wchar_t *targetAssembly = NULL;
 inline void initConfigFile()
 {
 	enabled = TRUE;
-	/*wchar_t* tgtAsm = L"Beat Saber_Data/Managed/IPA.Injector.dll";
-	targetAssembly = memalloc(sizeof(wchar_t) * 41);
-	memcpy(targetAssembly, tgtAsm, sizeof(wchar_t) * 41);*/
 
 	WIN32_FIND_DATAW findData;
 	HANDLE findHandle = FindFirstFileW(L"*_Data", &findData);
