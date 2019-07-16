@@ -110,7 +110,9 @@ void *ownMonoJitInitVersion(const char *root_domain_name, const char *runtime_ve
 	}
 
 	LOG("Invoking method!\n");
-	mono_runtime_invoke(method, NULL, args, NULL);
+
+    void* exception = NULL;
+	mono_runtime_invoke(method, NULL, args, &exception);
 
 	if (args != NULL)
 	{
@@ -118,6 +120,20 @@ void *ownMonoJitInitVersion(const char *root_domain_name, const char *runtime_ve
 		memfree(args);
 		NULL;
 	}
+
+#ifdef _VERBOSE
+    if (exception != NULL)
+    {
+        void* monostr = mono_object_to_string(exception, &exception);
+        if (exception != NULL)
+            LOG("An error occurred while invoking the injector, but the error could not be stringified.\n")
+        else 
+        {
+            char* str = mono_string_to_utf8(monostr);
+            LOG("An error occurred invoking the injector: %s\n", str);
+        }
+    }
+#endif
 
 	cleanupConfig();
 
