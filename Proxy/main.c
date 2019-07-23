@@ -45,11 +45,18 @@ void *ownMonoJitInitVersion(const char *root_domain_name, const char *runtime_ve
 		opts[0] = "";
 		ownMonoJitParseOptions(0, opts);
 	}
+#ifdef WIN32
+    if (debug_info) {
+        mono_debug_init(MONO_DEBUG_FORMAT_MONO);
+    }
+#endif
 
 	void *domain = mono_jit_init_version(root_domain_name, runtime_version);
 
 	if (debug_info) {
-		mono_debug_init(MONO_DEBUG_FORMAT_MONO);
+#ifdef WIN64
+        mono_debug_init(MONO_DEBUG_FORMAT_MONO);
+#endif
 		mono_debug_domain_create(domain);
 	}
 
@@ -147,14 +154,20 @@ void ownMonoJitParseOptions(int argc, char * argv[])
 	setOptions = TRUE;
 
 	int size = argc;
+#ifdef WIN64
 	if (debug) size += 2;
+#elif defined(WIN32)
+    if (debug) size += 1;
+#endif
 
 	char** arguments = memalloc(sizeof(char*) * size);
 	_ASSERTE(arguments != nullptr);
 	memcpy(arguments, argv, sizeof(char*) * argc);
 	if (debug) {
 		//arguments[argc++] = "--debug";
-		arguments[argc++] = "--soft-breakpoints";
+#ifdef WIN64
+        arguments[argc++] = "--soft-breakpoints";
+#endif
 		if (debug_server)
 			arguments[argc] = "--debugger-agent=transport=dt_socket,address=0.0.0.0:10000,server=y";
 		else

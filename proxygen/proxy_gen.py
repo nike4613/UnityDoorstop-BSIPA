@@ -11,6 +11,7 @@ def main():
     proxies = io.StringIO()
     proxy_add = io.StringIO()
     proxy_def = io.StringIO()
+    proxy_def_file = io.StringIO()
 
     count = 0
 
@@ -32,6 +33,7 @@ def main():
             proxies.write(f"{name}\n")
             proxy_add.write(f"ADD_ORIGINAL({count}, {name});\n")
             proxy_def.write(f"PROXY({count}, {name});\n")
+            proxy_def_file.write(f"    {name} @{count+1}\n")
             count = count + 1
 
     with open(f"{path}\\templates\\proxy_template.c", "r") as proxy_file:
@@ -39,6 +41,12 @@ def main():
     
     with open(f"{path}\\..\\Proxy\\proxy.c", "w") as proxy_c_file:
         proxy_c_file.write(new_proxy)
+        
+    with open(f"{path}\\templates\\proxy_template.def", "r") as proxy_file:
+        new_proxy_def = string.Template(proxy_file.read()).safe_substitute(proxy_exports=proxy_def_file.getvalue())
+    
+    with open(f"{path}\\..\\Proxy\\proxy.def", "w") as proxy_def_file:
+        proxy_def_file.write(new_proxy_def)
 
 if __name__ == "__main__":
     main()
