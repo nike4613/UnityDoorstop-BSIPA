@@ -137,8 +137,9 @@ inline BOOL iat_hook(HMODULE dll, char const* targetDLL, void *targetFunction, v
 			continue;
 
 		void **thunk = RVA2PTR(void**, mz, imports[i].FirstThunk);
+        void **nextThunk = RVA2PTR(void**, mz, imports[i+1].FirstThunk);
 
-		for (; thunk; thunk++)
+		for (; thunk && thunk < nextThunk; thunk++)
 		{
 			void *import = *thunk;
 

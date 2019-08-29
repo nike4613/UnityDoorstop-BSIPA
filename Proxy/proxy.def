@@ -50,3 +50,5 @@ EXPORTS
     WinHttpWebSocketSend @48
     WinHttpWebSocketShutdown @49
     WinHttpWriteData @50
+    SetGetMessageHook @51
+    SetPeekMessageHook @52

@@ -206,6 +206,113 @@ void * WINAPI hookGetProcAddress(HMODULE module, char const *name)
 	return (void*)GetProcAddress(module, name);
 }
 
+BOOL hookGetMessage(
+    BOOL isW,
+    LPMSG msg,
+    HWND hwnd,
+    UINT wMsgFilterMin,
+    UINT wMsgFilterMax
+);
+
+BOOL WINAPI hookGetMessageA(LPMSG msg, HWND hwnd, UINT wMsgFilterMin, UINT wMsgFilterMax)
+{
+    return hookGetMessage(FALSE, msg, hwnd, wMsgFilterMin, wMsgFilterMax);
+}
+BOOL WINAPI hookGetMessageW(LPMSG msg, HWND hwnd, UINT wMsgFilterMin, UINT wMsgFilterMax)
+{
+    return hookGetMessage(TRUE, msg, hwnd, wMsgFilterMin, wMsgFilterMax);
+}
+
+typedef BOOL(*GetMessageHook)(BOOL isW, BOOL result, LPMSG msg, HWND hwnd, UINT filterMin, UINT filterMax);
+
+GetMessageHook getMessageHook = NULL;
+
+__declspec(dllexport) void __stdcall SetGetMessageHook(GetMessageHook hook) {
+    getMessageHook = hook;
+}
+
+BOOL hookGetMessage(
+    BOOL isW,
+    LPMSG msg,
+    HWND hwnd,
+    UINT wMsgFilterMin,
+    UINT wMsgFilterMax
+)
+{
+    BOOL loop = FALSE;
+
+    BOOL result;
+
+    do {
+        if (isW) {
+            result = GetMessageW(msg, hwnd, wMsgFilterMin, wMsgFilterMax);
+        } else {
+            result = GetMessageA(msg, hwnd, wMsgFilterMin, wMsgFilterMax);
+        }
+
+        if (getMessageHook) {
+            loop = getMessageHook(isW, result, msg, hwnd, wMsgFilterMin, wMsgFilterMax);
+        }
+    } while (loop);
+
+    return result;
+}
+
+BOOL hookPeekMessage(
+    BOOL isW,
+    LPMSG msg,
+    HWND hwnd,
+    UINT wMsgFilterMin,
+    UINT wMsgFilterMax,
+    UINT wRemoveMsg
+);
+
+BOOL WINAPI hookPeekMessageA(LPMSG msg, HWND hwnd, UINT wMsgFilterMin, UINT wMsgFilterMax, UINT wRemoveMsg)
+{
+    return hookPeekMessage(FALSE, msg, hwnd, wMsgFilterMin, wMsgFilterMax, wRemoveMsg);
+}
+BOOL WINAPI hookPeekMessageW(LPMSG msg, HWND hwnd, UINT wMsgFilterMin, UINT wMsgFilterMax, UINT wRemoveMsg)
+{
+    return hookPeekMessage(TRUE, msg, hwnd, wMsgFilterMin, wMsgFilterMax, wRemoveMsg);
+}
+
+typedef BOOL(*PeekMessageHook)(BOOL isW, BOOL result, LPMSG msg, HWND hwnd, UINT filterMin, UINT filterMax, UINT* wRemoveMsg);
+
+PeekMessageHook peekMessageHook = NULL;
+
+__declspec(dllexport) void __stdcall SetPeekMessageHook(PeekMessageHook hook) {
+    peekMessageHook = hook;
+}
+
+BOOL hookPeekMessage(
+    BOOL isW,
+    LPMSG msg,
+    HWND hwnd,
+    UINT wMsgFilterMin,
+    UINT wMsgFilterMax,
+    UINT wRemoveMsg
+)
+{
+    BOOL loop = FALSE;
+
+    BOOL result;
+
+    do {
+        if (isW) {
+            result = PeekMessageW(msg, hwnd, wMsgFilterMin, wMsgFilterMax, wRemoveMsg);
+        }
+        else {
+            result = PeekMessageA(msg, hwnd, wMsgFilterMin, wMsgFilterMax, wRemoveMsg);
+        }
+
+        if (peekMessageHook) {
+            loop = peekMessageHook(isW, result, msg, hwnd, wMsgFilterMin, wMsgFilterMax, &wRemoveMsg);
+        }
+    } while (loop);
+
+    return result;
+}
+
 BOOL WINAPI DllMain(HINSTANCE hInstDll, DWORD reasonForDllLoad, LPVOID reserved)
 {
 	if (reasonForDllLoad != DLL_PROCESS_ATTACH)
@@ -249,10 +356,26 @@ BOOL WINAPI DllMain(HINSTANCE hInstDll, DWORD reasonForDllLoad, LPVOID reserved)
 			LOG("Failed to install IAT hook!\n");
 			free_logger();
 		}
-		else
-		{
-			LOG("Hook installed!\n");
-		}
+
+		LOG("Hook installed!\n");
+
+        LOG("Attempting to install GetMessageA and GetMessageW hooks\n");
+
+        if (!iat_hook(targetModule, "user32.dll", &GetMessageA, &hookGetMessageA)) {
+            LOG("Could not hook GetMessageA! (not an error)\n");
+        }
+        if (!iat_hook(targetModule, "user32.dll", &GetMessageW, &hookGetMessageW)) {
+            LOG("Could not hook GetMessageW! (not an error)\n");
+        }
+
+        LOG("Attempting to install PeekMessageA and PeekMessageW hooks\n");
+
+        if (!iat_hook(targetModule, "user32.dll", &PeekMessageA, &hookPeekMessageA)) {
+            LOG("Could not hook PeekMessageA! (not an error)\n");
+        }
+        if (!iat_hook(targetModule, "user32.dll", &PeekMessageW, &hookPeekMessageW)) {
+            LOG("Could not hook PeekMessageW! (not an error)\n");
+        }
 	}
 	else
 	{
