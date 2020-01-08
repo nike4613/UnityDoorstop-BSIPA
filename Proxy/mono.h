@@ -60,6 +60,7 @@ void *(*mono_get_string_class)();
 void *(*mono_string_new_utf16)(void *domain, const wchar_t *text, INT32 len);
 
 void* (*mono_object_to_string)(void* obj, void** exc);
+void (*mono_dllmap_insert)(void* assemblyImage, const char* dll, const char* func, const char* tdll, const char* tfunc);
 
 char* (*mono_string_to_utf8)(void* str);
 void (*mono_free)(void*);
@@ -93,5 +94,6 @@ inline void loadMonoFunctions(HMODULE monoLib)
 	GET_MONO_PROC(mono_array_addr_with_size);
     GET_MONO_PROC(mono_object_to_string);
     GET_MONO_PROC(mono_string_to_utf8);
+	GET_MONO_PROC(mono_dllmap_insert);
     GET_MONO_PROC(mono_free);
 }
